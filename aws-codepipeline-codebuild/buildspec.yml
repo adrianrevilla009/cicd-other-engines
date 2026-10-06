@@ -1,0 +1,18 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+  build:
+    commands:
+      - mvn -B -ntp compile
+      - mvn -B -ntp verify
+  post_build:
+    commands:
+      - mvn -B -ntp -DskipTests package
+reports:
+  junit:
+    files: ["target/surefire-reports/*.xml"]
+    file-format: JUNITXML
+artifacts:
+  files: ["target/*.jar"]

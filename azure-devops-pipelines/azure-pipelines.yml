@@ -1,0 +1,30 @@
+trigger: [main]
+pool:
+  vmImage: ubuntu-24.04
+stages:
+  - stage: build
+    jobs:
+      - job: compile
+        steps:
+          - script: mvn -B -ntp compile
+            displayName: Build
+  - stage: test
+    dependsOn: build
+    jobs:
+      - job: verify
+        steps:
+          - script: mvn -B -ntp verify
+            displayName: Test
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFiles: target/surefire-reports/*.xml
+  - stage: package
+    dependsOn: test
+    jobs:
+      - job: jar
+        steps:
+          - script: mvn -B -ntp -DskipTests package
+            displayName: Package
+          - publish: target
+            artifact: orders-jar

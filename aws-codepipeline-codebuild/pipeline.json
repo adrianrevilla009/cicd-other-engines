@@ -1,0 +1,15 @@
+{
+  "pipeline": {
+    "name": "orders-ci",
+    "roleArn": "arn:aws:iam::000000000000:role/placeholder-pipeline-role",
+    "artifactStore": {"type": "S3", "location": "placeholder-artifact-bucket"},
+    "stages": [
+      {"name": "Source", "actions": [{"name": "Source", "actionTypeId": {"category": "Source", "owner": "AWS", "provider": "CodeStarSourceConnection", "version": "1"},
+        "configuration": {"ConnectionArn": "arn:aws:codestar-connections:eu-west-1:000000000000:connection/placeholder", "FullRepositoryId": "owner/orders", "BranchName": "main"},
+        "outputArtifacts": [{"name": "src"}]}]},
+      {"name": "Build", "actions": [{"name": "Build", "actionTypeId": {"category": "Build", "owner": "AWS", "provider": "CodeBuild", "version": "1"},
+        "configuration": {"ProjectName": "orders-build"}, "inputArtifacts": [{"name": "src"}], "outputArtifacts": [{"name": "jar"}]}]}
+    ],
+    "version": 1
+  }
+}

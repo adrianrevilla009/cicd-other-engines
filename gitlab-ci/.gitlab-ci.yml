@@ -1,0 +1,24 @@
+image: maven:3.9.9-eclipse-temurin-21
+stages: [build, test, package]
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2"
+cache:
+  key: maven
+  paths: [.m2/]
+build:
+  stage: build
+  script: [mvn -B -ntp compile]
+test:
+  stage: test
+  script: [mvn -B -ntp verify]
+  artifacts:
+    when: always
+    reports:
+      junit: target/surefire-reports/*.xml
+package:
+  stage: package
+  script: [mvn -B -ntp -DskipTests package]
+  artifacts:
+    paths: [target/*.jar]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

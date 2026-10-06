@@ -1,0 +1,22 @@
+steps:
+  - id: build
+    name: maven:3.9.9-eclipse-temurin-21
+    entrypoint: mvn
+    args: [-B, -ntp, compile]
+  - id: test
+    name: maven:3.9.9-eclipse-temurin-21
+    entrypoint: mvn
+    args: [-B, -ntp, verify]
+    waitFor: [build]
+  - id: package
+    name: maven:3.9.9-eclipse-temurin-21
+    entrypoint: mvn
+    args: [-B, -ntp, -DskipTests, package]
+    waitFor: [test]
+artifacts:
+  objects:
+    location: gs://placeholder-bucket/orders
+    paths: [target/*.jar]
+options:
+  logging: CLOUD_LOGGING_ONLY
+timeout: 600s

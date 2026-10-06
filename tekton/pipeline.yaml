@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: maven
+spec:
+  params:
+    - name: goals
+      type: string
+  workspaces:
+    - name: source
+  steps:
+    - name: mvn
+      image: maven:3.9.9-eclipse-temurin-21
+      workingDir: $(workspaces.source.path)
+      script: mvn -B -ntp $(params.goals)
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: orders-ci
+spec:
+  workspaces:
+    - name: source
+  tasks:
+    - name: build
+      taskRef: {name: maven}
+      params: [{name: goals, value: compile}]
+      workspaces: [{name: source, workspace: source}]
+    - name: test
+      runAfter: [build]
+      taskRef: {name: maven}
+      params: [{name: goals, value: verify}]
+      workspaces: [{name: source, workspace: source}]
+    - name: package
+      runAfter: [test]
+      taskRef: {name: maven}
+      params: [{name: goals, value: "-DskipTests package"}]
+      workspaces: [{name: source, workspace: source}]

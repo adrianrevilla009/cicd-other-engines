@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: orders-ci-
+spec:
+  entrypoint: ci
+  templates:
+    - name: ci
+      dag:
+        tasks:
+          - {name: build, template: mvn, arguments: {parameters: [{name: goals, value: compile}]}}
+          - {name: test, dependencies: [build], template: mvn, arguments: {parameters: [{name: goals, value: verify}]}}
+          - {name: package, dependencies: [test], template: mvn, arguments: {parameters: [{name: goals, value: "-DskipTests package"}]}}
+    - name: mvn
+      inputs:
+        parameters: [{name: goals}]
+      container:
+        image: maven:3.9.9-eclipse-temurin-21
+        command: [sh, -c]
+        args: ["mvn -B -ntp {{inputs.parameters.goals}}"]
